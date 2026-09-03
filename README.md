@@ -1,4 +1,4 @@
-# App_Group
+# Clamorix
 
 import 'dart:async';
 
@@ -6,8 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'firebase_options.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await initializeDateFormatting('uk_UA');
   runApp(const GroupApp());
 }
@@ -99,21 +105,14 @@ void showServicesSheet(BuildContext context) {
 
     // Красиві заокруглені краї
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(28),
-      ),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
     ),
 
     showDragHandle: true,
 
     builder: (context) {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(
-          20,
-          4,
-          20,
-          30,
-        ),
+        padding: const EdgeInsets.fromLTRB(20, 4, 20, 30),
 
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -122,10 +121,7 @@ void showServicesSheet(BuildContext context) {
           children: [
             const Text(
               'Інші сервіси',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 18),
@@ -202,18 +198,14 @@ class ServiceTile extends StatelessWidget {
                     borderRadius: BorderRadius.circular(14),
                   ),
 
-                  child: Icon(
-                    icon,
-                    color: Colors.white,
-                  ),
+                  child: Icon(icon, color: Colors.white),
                 ),
 
                 const SizedBox(width: 14),
 
                 Expanded(
                   child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
 
                     children: [
                       Text(
@@ -235,11 +227,7 @@ class ServiceTile extends StatelessWidget {
                   ),
                 ),
 
-                const Icon(
-                  Icons.open_in_new,
-                  size: 18,
-                  color: Colors.grey,
-                ),
+                const Icon(Icons.open_in_new, size: 18, color: Colors.grey),
               ],
             ),
           ),
@@ -252,10 +240,7 @@ class ServiceTile extends StatelessWidget {
 class PageHeader extends StatelessWidget {
   final String title;
 
-  const PageHeader({
-    super.key,
-    required this.title,
-  });
+  const PageHeader({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -265,10 +250,7 @@ class PageHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
         ),
 
         IconButton.filledTonal(
@@ -277,10 +259,7 @@ class PageHeader extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    const SettingsPage(),
-              ),
+              MaterialPageRoute(builder: (context) => const SettingsPage()),
             );
           },
         ),
@@ -292,11 +271,7 @@ class PageHeader extends StatelessWidget {
 class _MainPageState extends State<MainPage> {
   int selectedIndex = 0;
 
-  final List<Widget> pages = const [
-    HomePage(),
-    SchedulePage(),
-    SubjectsPage(),
-  ];
+  final List<Widget> pages = const [HomePage(), SchedulePage(), SubjectsPage()];
 
   @override
   Widget build(BuildContext context) {
@@ -307,7 +282,7 @@ class _MainPageState extends State<MainPage> {
         selectedIndex: selectedIndex,
 
         onDestinationSelected: (index) {
-    // Натиснули "Інше"
+          // Натиснули "Інше"
           if (index == 3) {
             showServicesSheet(context);
             return;
@@ -337,14 +312,41 @@ class _MainPageState extends State<MainPage> {
             label: 'Предмети',
           ),
 
-          NavigationDestination(
-            icon: Icon(Icons.apps_outlined),
-            label: 'Інше',
-          ),
+          NavigationDestination(icon: Icon(Icons.apps_outlined), label: 'Інше'),
         ],
       ),
     );
   }
+}
+
+@override
+Widget build(BuildContext context) {
+  return Row(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const PageHeader(title: 'Головна'),
+
+            const SizedBox(height: 28),
+          ],
+        ),
+      ),
+
+      IconButton.filledTonal(
+        icon: const Icon(Icons.settings_outlined),
+
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const SettingsPage()),
+          );
+        },
+      ),
+    ],
+  );
 }
 
 // ГОЛОВНА
@@ -359,19 +361,12 @@ class HomePage extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
         children: [
           //верхня панель
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const PageHeader(
-                title: 'Головна',
-              )
-            ],
-          ),
+          const PageHeader(title: 'Головна'),
 
           const SizedBox(height: 28),
 
           //дата
-          CurrentDateTime(),
+          const CurrentDateTime(),
 
           SizedBox(height: 30),
 
@@ -592,6 +587,37 @@ class QuickAction extends StatelessWidget {
 }
 
 // РОЗКЛАД
+class Lesson {
+  final String id;
+  final String date;
+  final String startTime;
+  final String endTime;
+  final String subjectId;
+  final String room;
+  final String type;
+
+  const Lesson({
+    required this.id,
+    required this.date,
+    required this.startTime,
+    required this.endTime,
+    required this.subjectId,
+    required this.room,
+    required this.type,
+  });
+
+  factory Lesson.fromFirestore(String id, Map<String, dynamic> data) {
+    return Lesson(
+      id: id,
+      date: data['date'] ?? '',
+      startTime: data['startTime'] ?? '',
+      endTime: data['endTime'] ?? '',
+      subjectId: data['subjectId'] ?? '',
+      room: data['room'] ?? '',
+      type: data['type'] ?? '',
+    );
+  }
+}
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
@@ -600,91 +626,241 @@ class SchedulePage extends StatefulWidget {
   State<SchedulePage> createState() => _SchedulePageState();
 }
 
-class _SchedulePageState extends State<SchedulePage> {
-  int selectedDay = 2;
+String _lessonTypeName(String type) {
+  switch (type.toLowerCase()) {
+    case 'lecture':
+      return 'Лекція';
 
-  final days = const [
-    ('ПН', '31'),
-    ('ВТ', '1'),
-    ('СР', '2'),
-    ('ЧТ', '3'),
-    ('ПТ', '4'),
-    ('СБ', '5'),
-  ];
+    case 'practice':
+      return 'Практична';
+
+    case 'lab':
+      return 'Лабораторна';
+
+    default:
+      return type;
+  }
+}
+
+String getSubjectName(String subjectId) {
+  switch (subjectId.toLowerCase()) {
+    case 'srm':
+      return 'СРМ';
+    case 'tek':
+      return 'ТЕК';
+    case 'fv':
+      return 'ФВ';
+    case 'at':
+      return 'АТ';
+    case 'kpp':
+      return 'КПП';
+    case 'am':
+      return 'АМ';
+    case 'fil':
+      return 'ФІЛ';
+    case 'zt':
+      return 'ЗТ';
+    case 'ovu':
+      return 'ОВУ';
+    case 'ovzv':
+      return 'ОВЗв';
+    case 'szvp':
+      return 'СЗВП';
+    case 'ovzak':
+      return 'ОВЗак';
+    case 'rp':
+      return 'РП';
+    case 'ikg':
+      return 'ІКГ';
+    case '-':
+      return 'Сампо';
+
+    default:
+      return subjectId;
+  }
+}
+
+class _SchedulePageState extends State<SchedulePage> {
+  late DateTime selectedDate;
+  late DateTime currentWeekStart;
+
+  @override
+  void initState() {
+    super.initState();
+
+    selectedDate = DateTime.now();
+    currentWeekStart = _startOfWeek(selectedDate);
+  }
+
+  DateTime _startOfWeek(DateTime date) {
+    return DateTime(
+      date.year,
+      date.month,
+      date.day,
+    ).subtract(Duration(days: date.weekday - 1));
+  }
+
+  List<DateTime> get weekDays {
+    return List.generate(
+      7,
+      (index) => currentWeekStart.add(Duration(days: index)),
+    );
+  }
+
+  void previousWeek() {
+    setState(() {
+      currentWeekStart = currentWeekStart.subtract(const Duration(days: 7));
+
+      selectedDate = currentWeekStart;
+    });
+  }
+
+  void nextWeek() {
+    setState(() {
+      currentWeekStart = currentWeekStart.add(const Duration(days: 7));
+
+      selectedDate = currentWeekStart;
+    });
+  }
+
+  void goToToday() {
+    setState(() {
+      selectedDate = DateTime.now();
+      currentWeekStart = _startOfWeek(selectedDate);
+    });
+  }
+
+  bool isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final days = weekDays;
+
+    final selectedDateText = DateFormat(
+      'EEEE, d MMMM',
+      'uk_UA',
+    ).format(selectedDate);
+
+    final monthText = DateFormat('LLLL yyyy', 'uk_UA').format(selectedDate);
+
     return SafeArea(
       child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 18, 20, 14),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
               children: [
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    PageHeader(
-                      title: 'Розклад',
-                    )
-                    
-                  ],
-                ),
+                const PageHeader(title: 'Розклад'),
 
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      selectedDay = 2;
-                    });
-                  },
-                  child: const Text('Сьогодні'),
+                const SizedBox(height: 18),
+
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: previousWeek,
+                      icon: const Icon(Icons.chevron_left),
+                    ),
+
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          monthText,
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    TextButton(
+                      onPressed: goToToday,
+                      child: const Text('Сьогодні'),
+                    ),
+
+                    IconButton(
+                      onPressed: nextWeek,
+                      icon: const Icon(Icons.chevron_right),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
 
-          // Дні тижня
           SizedBox(
-            height: 76,
+            height: 78,
             child: ListView.separated(
               padding: const EdgeInsets.symmetric(horizontal: 20),
+
               scrollDirection: Axis.horizontal,
+
               itemCount: days.length,
+
               separatorBuilder: (_, _) => const SizedBox(width: 8),
+
               itemBuilder: (context, index) {
-                final selected = selectedDay == index;
+                final day = days[index];
+
+                final selected = isSameDay(day, selectedDate);
+
+                final today = isSameDay(day, DateTime.now());
 
                 return GestureDetector(
                   onTap: () {
                     setState(() {
-                      selectedDay = index;
+                      selectedDate = day;
                     });
                   },
+
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 180),
-                    width: 56,
+
+                    width: 52,
+
                     decoration: BoxDecoration(
-                      color: selected ? Colors.black : Colors.grey.shade100,
+                      color: selected
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.surfaceContainer,
+
                       borderRadius: BorderRadius.circular(18),
+
+                      border: today && !selected
+                          ? Border.all(
+                              color: Theme.of(context).colorScheme.primary,
+                            )
+                          : null,
                     ),
+
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
+
                       children: [
                         Text(
-                          days[index].$1,
+                          DateFormat('E', 'uk_UA').format(day).toUpperCase(),
+
                           style: TextStyle(
-                            fontSize: 12,
-                            color: selected ? Colors.white70 : Colors.grey,
+                            fontSize: 11,
+                            color: selected
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : Colors.grey,
                           ),
                         ),
+
                         const SizedBox(height: 5),
+
                         Text(
-                          days[index].$2,
+                          '${day.day}',
+
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: selected ? Colors.white : Colors.black,
+
+                            color: selected
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       ],
@@ -697,44 +873,93 @@ class _SchedulePageState extends State<SchedulePage> {
 
           const SizedBox(height: 20),
 
-          // Розклад вибраного дня
           Expanded(
             child: ListView(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
-              children: const [
+
+              children: [
                 Text(
-                  'Середа, 2 вересня',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  _capitalize(selectedDateText),
+
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
 
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-                ScheduleLesson(
-                  start: '08:30',
-                  end: '9:50',
-                  subject: 'Вища математика',
-                  details: 'Лекція · ауд. 305',
-                ),
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('lessons')
+                      .where(
+                        'date',
+                        isEqualTo: DateFormat('yyyy-MM-dd')
+                            .format(selectedDate),
+                      )
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text(
+                          'Помилка завантаження:\n${snapshot.error}',
+                          textAlign: TextAlign.center,
+                        ),
+                      );
+                    }
 
-                ScheduleLesson(
-                  start: '10:05',
-                  end: '11:25',
-                  subject: 'Програмування',
-                  details: 'Практична · ауд. 207',
-                ),
+                    if (!snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-                ScheduleLesson(
-                  start: '11:40',
-                  end: '13:00',
-                  subject: 'Спеціальні розділи математики',
-                  details: 'Лекція · ауд. 305',
-                ),
+                    final lessons = snapshot.data!.docs.map((doc) {
+                      return Lesson.fromFirestore(
+                        doc.id,
+                        doc.data() as Map<String, dynamic>,
+                      );
+                    }).toList();
+                    // Оскільки HH:mm має формат 08:30, 10:05 тощо,
+                    // рядкове сортування тут працюватиме правильно.
+                    lessons.sort((a, b) => a.startTime.compareTo(b.startTime));
+                    if (lessons.isEmpty) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(40),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.event_available,
+                                size: 42,
+                                color: Colors.grey,
+                              ),
 
-                ScheduleLesson(
-                  start: '14:40',
-                  end: '16:00',
-                  subject: 'Фізика',
-                  details: 'Лабораторна · ауд. 304',
+                              SizedBox(height: 12),
+
+                              Text(
+                                'На цей день занять немає',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+
+                    return Column(
+                      children: lessons.map((lesson) {
+                        return ScheduleLesson(
+                          start: lesson.startTime,
+                          end: lesson.endTime,
+                          subject: getSubjectName(lesson.subjectId),
+                          details:
+                              '${_lessonTypeName(lesson.type)} · ауд. ${lesson.room}',
+                        );
+                      }).toList(),
+                    );
+                  },
                 ),
               ],
             ),
@@ -743,6 +968,12 @@ class _SchedulePageState extends State<SchedulePage> {
       ),
     );
   }
+}
+
+String _capitalize(String text) {
+  if (text.isEmpty) return text;
+
+  return text[0].toUpperCase() + text.substring(1);
 }
 
 class ScheduleLesson extends StatelessWidget {
@@ -995,10 +1226,7 @@ class _SubjectsPageState extends State<SubjectsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Предмети',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                ),
+                const PageHeader(title: 'Предмети'),
 
                 const SizedBox(height: 18),
 
@@ -1096,9 +1324,7 @@ class _SubjectsPagesState extends State<SubjectsPages> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const PageHeader(
-                  title: 'Предмети',
-                ),
+                const PageHeader(title: 'Предмети'),
 
                 const SizedBox(height: 18),
 
@@ -1387,14 +1613,208 @@ class TeacherTile extends StatelessWidget {
 
 // НАЛАШТУВАННЯ
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
   @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  bool scheduleNotifications = true;
+  bool homeworkNotifications = true;
+  bool showPastLessons = true;
+
+  @override
   Widget build(BuildContext context) {
-    return const SafeArea(
-      child: Center(
-        child: Text('Налаштування', style: TextStyle(fontSize: 30)),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Налаштування')),
+
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
+
+        children: [
+          const SettingsSectionTitle(title: 'ВИГЛЯД'),
+
+          SettingsTile(
+            icon: Icons.dark_mode_outlined,
+            title: 'Тема',
+            subtitle: 'Системна',
+            onTap: () {
+              // Зробимо трохи пізніше
+            },
+          ),
+
+          const SizedBox(height: 28),
+
+          const SettingsSectionTitle(title: 'СПОВІЩЕННЯ'),
+
+          SettingsSwitchTile(
+            icon: Icons.notifications_outlined,
+            title: 'Зміни розкладу',
+            subtitle: 'Сповіщати про перенесення та скасування',
+            value: scheduleNotifications,
+            onChanged: (value) {
+              setState(() {
+                scheduleNotifications = value;
+              });
+            },
+          ),
+
+          SettingsSwitchTile(
+            icon: Icons.assignment_outlined,
+            title: 'Домашні завдання',
+            subtitle: 'Нагадувати про домашні завдання',
+            value: homeworkNotifications,
+            onChanged: (value) {
+              setState(() {
+                homeworkNotifications = value;
+              });
+            },
+          ),
+
+          const SizedBox(height: 28),
+
+          const SettingsSectionTitle(title: 'РОЗКЛАД'),
+
+          SettingsSwitchTile(
+            icon: Icons.history,
+            title: 'Минулі пари',
+            subtitle: 'Показувати завершені пари',
+            value: showPastLessons,
+            onChanged: (value) {
+              setState(() {
+                showPastLessons = value;
+              });
+            },
+          ),
+
+          const SizedBox(height: 28),
+
+          const SettingsSectionTitle(title: 'ПРО ЗАСТОСУНОК'),
+
+          SettingsTile(
+            icon: Icons.info_outline,
+            title: 'Про Clamorix',
+            subtitle: 'Версія 0.1.0 Beta',
+            onTap: () {
+              showAboutDialog(
+                context: context,
+                applicationName: 'Clamorix',
+                applicationVersion: '0.1.0 Beta',
+                applicationLegalese: 'Навчальний застосунок групи',
+              );
+            },
+          ),
+
+          SettingsTile(
+            icon: Icons.system_update_outlined,
+            title: 'Перевірити оновлення',
+            subtitle: 'Встановлено актуальну версію',
+            onTap: () {},
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SettingsTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const SettingsTile({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+
+      leading: Container(
+        width: 42,
+        height: 42,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(13),
+        ),
+        child: Icon(icon),
+      ),
+
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+
+      subtitle: Text(subtitle),
+
+      trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+
+      onTap: onTap,
+    );
+  }
+}
+
+class SettingsSwitchTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  const SettingsSwitchTile({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+
+      leading: Container(
+        width: 42,
+        height: 42,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(13),
+        ),
+        child: Icon(icon),
+      ),
+
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+
+      subtitle: Text(subtitle),
+
+      trailing: Switch(value: value, onChanged: onChanged),
+    );
+  }
+}
+
+class SettingsSectionTitle extends StatelessWidget {
+  final String title;
+
+  const SettingsSectionTitle({super.key, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 10),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: Colors.grey,
+        ),
       ),
     );
   }
