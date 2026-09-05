@@ -2,17 +2,15 @@ class Assignment {
   final String id;
   final String subjectId;
   final String title;
+  final String deadline;
   final String description;
-  final String dueDate; // формат 'yyyy-MM-dd'
-  final bool isDone;
 
   const Assignment({
     required this.id,
     required this.subjectId,
     required this.title,
+    required this.deadline,
     required this.description,
-    required this.dueDate,
-    this.isDone = false,
   });
 
   factory Assignment.fromFirestore(String id, Map<String, dynamic> data) {
@@ -20,19 +18,8 @@ class Assignment {
       id: id,
       subjectId: data['subjectId'] ?? '',
       title: data['title'] ?? '',
+      deadline: data['deadline'] ?? '',
       description: data['description'] ?? '',
-      dueDate: data['dueDate'] ?? '',
-      isDone: data['isDone'] ?? false,
     );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'subjectId': subjectId,
-      'title': title,
-      'description': description,
-      'dueDate': dueDate,
-      'isDone': isDone,
-    };
   }
 }
