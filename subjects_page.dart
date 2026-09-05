@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/subject.dart';
+import '../services/firestore_service.dart';
 import '../widgets/page_header.dart';
 import '../widgets/subject_card.dart';
 import 'subject_details_page.dart';
@@ -17,22 +18,15 @@ class _SubjectsPageState extends State<SubjectsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredSubjects = subjects.where((subject) {
-      final query = searchQuery.toLowerCase();
-
-      return subject.shortName.toLowerCase().contains(query) ||
-          subject.fullName.toLowerCase().contains(query) ||
-          subject.lectureTeacher.toLowerCase().contains(query) ||
-          subject.practiceTeacher.toLowerCase().contains(query);
-    }).toList();
-
     return SafeArea(
       child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+
               children: [
                 const PageHeader(title: 'Предмети'),
 
@@ -44,53 +38,78 @@ class _SubjectsPageState extends State<SubjectsPage> {
                       searchQuery = value;
                     });
                   },
+
                   decoration: InputDecoration(
                     hintText: 'Пошук предмету...',
+
                     prefixIcon: const Icon(Icons.search),
 
                     filled: true,
-                    fillColor: Colors.grey.shade100,
+
+                    fillColor: Theme.of(context).colorScheme.surfaceContainer,
 
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(18),
+
                       borderSide: BorderSide.none,
                     ),
                   ),
-                ),
-
-                const SizedBox(height: 14),
-
-                Text(
-                  '${filteredSubjects.length} предметів',
-                  style: const TextStyle(color: Colors.grey),
                 ),
               ],
             ),
           ),
 
           Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.fromLTRB(20, 4, 20, 30),
+            child: StreamBuilder<List<Subject>>(
+              stream: FirestoreService.instance.subjects(),
 
-              itemCount: filteredSubjects.length,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return const Center(
+                    child: Text('Не вдалося завантажити предмети'),
+                  );
+                }
 
-              separatorBuilder: (context, index) {
-                return const SizedBox(height: 10);
-              },
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-              itemBuilder: (context, index) {
-                final subject = filteredSubjects[index];
+                final query = searchQuery.trim().toLowerCase();
 
-                return SubjectCard(
-                  subject: subject,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return SubjectDetailsPage(subject: subject);
-                        },
-                      ),
+                final filtered = snapshot.data!.where((subject) {
+                  return subject.shortName.toLowerCase().contains(query) ||
+                      subject.fullName.toLowerCase().contains(query) ||
+                      subject.lectureTeacher.toLowerCase().contains(query) ||
+                      subject.practiceTeacher.toLowerCase().contains(query);
+                }).toList();
+
+                if (filtered.isEmpty) {
+                  return const Center(child: Text('Нічого не знайдено'));
+                }
+
+                return ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 30),
+
+                  itemCount: filtered.length,
+
+                  separatorBuilder: (_, _) => const SizedBox(height: 10),
+
+                  itemBuilder: (context, index) {
+                    final subject = filtered[index];
+
+                    return SubjectCard(
+                      subject: subject,
+
+                      onTap: () {
+                        Navigator.push(
+                          context,
+
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                SubjectDetailsPage(subject: subject),
+                          ),
+                        );
+                      },
                     );
                   },
                 );
