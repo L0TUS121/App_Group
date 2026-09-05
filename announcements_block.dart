@@ -26,7 +26,7 @@ class AnnouncementsBlock extends StatelessWidget {
           return Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: Theme.of(context).colorScheme.surfaceContainer,
               borderRadius: BorderRadius.circular(20),
             ),
             child: const Text('Нових повідомлень немає'),
@@ -40,7 +40,7 @@ class AnnouncementsBlock extends StatelessWidget {
           padding: const EdgeInsets.all(18),
 
           decoration: BoxDecoration(
-            color: Colors.black,
+            color: Theme.of(context).colorScheme.onSurface,
             borderRadius: BorderRadius.circular(20),
           ),
 
@@ -48,7 +48,10 @@ class AnnouncementsBlock extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
 
             children: [
-              const Icon(Icons.notifications_outlined, color: Colors.white),
+              Icon(
+                Icons.notifications_outlined,
+                color: Theme.of(context).colorScheme.onSecondary,
+              ),
 
               const SizedBox(width: 12),
 
@@ -60,8 +63,8 @@ class AnnouncementsBlock extends StatelessWidget {
                     Text(
                       announcement.title,
 
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSecondary,
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
@@ -72,7 +75,9 @@ class AnnouncementsBlock extends StatelessWidget {
                     Text(
                       announcement.message,
 
-                      style: const TextStyle(color: Colors.white70),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSecondary,
+                      ),
                     ),
                   ],
                 ),
