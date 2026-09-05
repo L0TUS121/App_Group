@@ -11,7 +11,7 @@ class SubjectCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.grey.shade100,
+      color: Theme.of(context).colorScheme.surfaceContainer,
       borderRadius: BorderRadius.circular(20),
 
       child: InkWell(
@@ -30,14 +30,14 @@ class SubjectCard extends StatelessWidget {
                 alignment: Alignment.center,
 
                 decoration: BoxDecoration(
-                  color: Colors.black,
+                  color: Theme.of(context).colorScheme.onSurface,
                   borderRadius: BorderRadius.circular(16),
                 ),
 
                 child: Text(
                   subject.shortName,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.surfaceContainer,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
