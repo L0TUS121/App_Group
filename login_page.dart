@@ -62,10 +62,7 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   const Text(
                     'Вхід',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                   ),
 
                   const SizedBox(height: 6),
@@ -83,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
                     decoration: InputDecoration(
                       hintText: 'Електронна пошта',
                       filled: true,
-                      fillColor: Colors.grey.shade100,
+                      fillColor: Theme.of(context).colorScheme.surfaceContainer,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(18),
                         borderSide: BorderSide.none,
@@ -99,7 +96,7 @@ class _LoginPageState extends State<LoginPage> {
                     decoration: InputDecoration(
                       hintText: 'Пароль',
                       filled: true,
-                      fillColor: Colors.grey.shade100,
+                      fillColor: Theme.of(context).colorScheme.surfaceContainer,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(18),
                         borderSide: BorderSide.none,
@@ -109,7 +106,10 @@ class _LoginPageState extends State<LoginPage> {
 
                   if (_errorText != null) ...[
                     const SizedBox(height: 14),
-                    Text(_errorText!, style: const TextStyle(color: Colors.red)),
+                    Text(
+                      _errorText!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
                   ],
 
                   const SizedBox(height: 24),
@@ -118,7 +118,9 @@ class _LoginPageState extends State<LoginPage> {
                     width: double.infinity,
                     child: FilledButton(
                       style: FilledButton.styleFrom(
-                        backgroundColor: Colors.black,
+                        backgroundColor: Theme.of(context)
+                            .colorScheme
+                            .onSurface,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18),
