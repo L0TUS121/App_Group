@@ -77,7 +77,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   decoration: InputDecoration(
                     hintText: 'Електронна пошта',
                     filled: true,
-                    fillColor: Colors.grey.shade100,
+                    fillColor: Theme.of(context).colorScheme.surfaceContainer,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(18),
                       borderSide: BorderSide.none,
@@ -93,7 +93,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   decoration: InputDecoration(
                     hintText: 'Пароль',
                     filled: true,
-                    fillColor: Colors.grey.shade100,
+                    fillColor: Theme.of(context).colorScheme.surfaceContainer,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(18),
                       borderSide: BorderSide.none,
@@ -109,7 +109,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   decoration: InputDecoration(
                     hintText: 'Підтвердіть пароль',
                     filled: true,
-                    fillColor: Colors.grey.shade100,
+                    fillColor: Theme.of(context).colorScheme.surfaceContainer,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(18),
                       borderSide: BorderSide.none,
@@ -128,7 +128,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   width: double.infinity,
                   child: FilledButton(
                     style: FilledButton.styleFrom(
-                      backgroundColor: Colors.black,
+                      backgroundColor: Theme.of(context).colorScheme.onSurface,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(18),
