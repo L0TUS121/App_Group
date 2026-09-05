@@ -15,7 +15,7 @@ class QuickAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.grey.shade100,
+      color: Theme.of(context).colorScheme.surfaceContainer,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
