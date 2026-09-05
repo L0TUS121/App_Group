@@ -1,15 +1,11 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
-import '../models/lesson.dart';
-import '../models/subject.dart';
-import '../services/firestore_service.dart';
 import '../widgets/announcements_block.dart';
-import '../widgets/lesson_tile.dart';
+import '../widgets/current_date_time.dart';
 import '../widgets/page_header.dart';
 import '../widgets/quick_action.dart';
+import '../widgets/today_schedule.dart';
+import '../services/link_service.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -48,7 +44,9 @@ class HomePage extends StatelessWidget {
                 child: QuickAction(
                   icon: Icons.school_outlined,
                   text: 'Moodle',
-                  onTap: () {},
+                  onTap: () {
+                    LinkService.open('https://dls.viti.edu.ua/login/index.php');
+                  },
                 ),
               ),
 
@@ -58,7 +56,11 @@ class HomePage extends StatelessWidget {
                 child: QuickAction(
                   icon: Icons.menu_book_outlined,
                   text: 'Щоденник',
-                  onTap: () {},
+                  onTap: () {
+                    LinkService.open(
+                      'https://mitit.cloudflareaccess.com/cdn-cgi/access/login/gradebook.viti.edu.ua?kid=f4029a01a58a4e99da60ba138b23e4e14dd4907650d5d01f936ae2c22783c354&meta=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IjA1ZDgxNDE5MTkxNjU1YTJmMzlhZGM0ZTZhNzFjMmE0YzcwMmIyOGFjZTM3MmI1ZGYwNzZkYWRkYjEyYWU0ZTQifQ.eyJ0eXBlIjoibWV0YSIsImF1ZCI6ImY0MDI5YTAxYTU4YTRlOTlkYTYwYmExMzhiMjNlNGUxNGRkNDkwNzY1MGQ1ZDAxZjkzNmFlMmMyMjc4M2MzNTQiLCJob3N0bmFtZSI6ImdyYWRlYm9vay52aXRpLmVkdS51YSIsInJlZGlyZWN0X3VybCI6Ii9yYXRpbmdzIiwic2VydmljZV90b2tlbl9zdGF0dXMiOmZhbHNlLCJpc193YXJwIjpmYWxzZSwiaXNfZ2F0ZXdheSI6ZmFsc2UsImV4cCI6MTc4ODUyMTAzNCwibmJmIjoxNzg4NTIwNzM0LCJpYXQiOjE3ODg1MjA3MzQsImF1dGhfc3RhdHVzIjoiTk9ORSIsIm10bHNfYXV0aCI6eyJjZXJ0X2lzc3Vlcl9kbiI6IiIsImNlcnRfc2VyaWFsIjoiIiwiY2VydF9pc3N1ZXJfc2tpIjoiIiwiY2VydF9wcmVzZW50ZWQiOmZhbHNlLCJjb21tb25fbmFtZSI6IiIsImF1dGhfc3RhdHVzIjoiTk9ORSJ9LCJyZWFsX2NvdW50cnkiOiJVQSIsImFwcF9zZXNzaW9uX2hhc2giOiJiNThiNjU5MDc0MjQyNWU1YzQ4Y2MzZDFkZjFiNGE1ODFlYWY0NTJlYjUxNjI2MzgzMzE2NzQxYzMxYzA3MTE2In0.UcsSwSdoIOKmMgwOJZn1U-9jsENvjpcyxUA4llDIUfQVwyJNXseGQLfvMMNyHOy9mzXdgHWYdwOA0GXhKhuxZb-HVR8Szne9_UaRzGdJRupjRIj0rBfZ-8QuSiNphhCTEqZ7x_Lt93tkodrBmEMNOKYfR2VcEOgn9GRx0sSy2XwqU9ncOYun8ug3rNCBxJOr6IPNT6jOT4M5n6CgXmfAHYHxSVtIMEjEXFfpK_UTQYbEmSVKdkZlPpVr27S9l44GEAFAG3tiOWll6sAKPV88K7LGYaLU8-7et3T48hBhr8B-7OL1ARepsvkm-2p5BKjKp7TvZUf0Ic0oJ0wExe3EQQ&redirect_url=%2Fratings',
+                    );
+                  },
                 ),
               ),
             ],
@@ -66,7 +68,7 @@ class HomePage extends StatelessWidget {
 
           const SizedBox(height: 28),
 
-          const Text(
+          Text(
             'СПОВІЩЕННЯ',
             style: TextStyle(
               fontSize: 13,
@@ -80,119 +82,6 @@ class HomePage extends StatelessWidget {
           const AnnouncementsBlock(),
         ],
       ),
-    );
-  }
-}
-
-//годинник
-class CurrentDateTime extends StatefulWidget {
-  const CurrentDateTime({super.key});
-
-  @override
-  State<CurrentDateTime> createState() => _CurrentDateTimeState();
-}
-
-class _CurrentDateTimeState extends State<CurrentDateTime> {
-  DateTime _now = DateTime.now();
-  Timer? _timer;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _timer = Timer.periodic(const Duration(seconds: 30), (timer) {
-      setState(() {
-        _now = DateTime.now();
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final time = DateFormat('HH:mm').format(_now);
-    final date = DateFormat('EEEE, d MMMM', 'uk_UA').format(_now);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          time,
-          style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-        ),
-
-        const SizedBox(height: 4),
-
-        Text(date, style: const TextStyle(fontSize: 17, color: Colors.grey)),
-      ],
-    );
-  }
-}
-
-// Список пар на сьогодні.
-class TodaySchedule extends StatelessWidget {
-  const TodaySchedule({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
-
-    return StreamBuilder<List<Lesson>>(
-      stream: FirestoreService.instance.lessonsForDate(today),
-
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const Text('Не вдалося завантажити розклад');
-        }
-
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        final lessons = snapshot.data!;
-
-        if (lessons.isEmpty) {
-          return Container(
-            padding: const EdgeInsets.all(20),
-
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainer,
-
-              borderRadius: BorderRadius.circular(20),
-            ),
-
-            child: const Row(
-              children: [
-                Icon(Icons.event_available),
-
-                SizedBox(width: 12),
-
-                Text('Сьогодні занять немає 🎉'),
-              ],
-            ),
-          );
-        }
-
-        return Column(
-          children: [
-            for (int i = 0; i < lessons.length; i++)
-              LessonTile(
-                number: '${i + 1}',
-
-                subject: getSubjectName(lessons[i].subjectId),
-
-                time: '${lessons[i].startTime} – ${lessons[i].endTime}',
-
-                room: lessons[i].room,
-              ),
-          ],
-        );
-      },
     );
   }
 }
