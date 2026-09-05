@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../services/notification_service.dart';
 import '../widgets/settings_switch_tile.dart';
 import '../widgets/settings_tile.dart';
-
-// НАЛАШТУВАННЯ
+import '../services/theme_service.dart';
+import '../services/auth_service.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -13,100 +14,196 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  bool scheduleNotifications = true;
-  bool homeworkNotifications = true;
-  bool showPastLessons = true;
+  bool announcements = true;
+  bool schedule = true;
+  bool homework = true;
+
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final notifications = NotificationService.instance;
+
+    final a = await notifications.getAnnouncementsEnabled();
+    final s = await notifications.getScheduleEnabled();
+    final h = await notifications.getHomeworkEnabled();
+
+    if (!mounted) return;
+
+    setState(() {
+      announcements = a;
+      schedule = s;
+      homework = h;
+
+      loading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Налаштування')),
 
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
+      body: loading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
 
-        children: [
-          const SettingsSectionTitle(title: 'ВИГЛЯД'),
+              children: [
+                const SettingsSectionTitle(title: 'ТЕМА'),
 
-          SettingsTile(
-            icon: Icons.dark_mode_outlined,
-            title: 'Тема',
-            subtitle: 'Системна',
-            onTap: () {
-              // Зробимо трохи пізніше
-            },
-          ),
+                //Теми
+                SettingsSwitchTile(
+                  icon: Icons.dark_mode_outlined,
+                  title: 'Темна тема',
+                  subtitle: 'Використовувати темну тему застосунку',
+                  value: Theme.of(context).brightness == Brightness.dark,
+                  onChanged: (value) async {
+                    await ThemeService.instance.setTheme(
+                      value ? ThemeMode.dark : ThemeMode.light,
+                    );
+                  },
+                ),
 
-          const SizedBox(height: 28),
+                const SettingsSectionTitle(title: 'СПОВІЩЕННЯ'),
 
-          const SettingsSectionTitle(title: 'СПОВІЩЕННЯ'),
+                // Оголошення
+                SettingsSwitchTile(
+                  icon: Icons.campaign_outlined,
+                  title: 'Оголошення',
+                  subtitle: 'Важливі повідомлення групи',
+                  value: announcements,
+                  onChanged: (value) async {
+                    await NotificationService.instance.setAnnouncementsEnabled(
+                      value,
+                    );
 
-          SettingsSwitchTile(
-            icon: Icons.notifications_outlined,
-            title: 'Зміни розкладу',
-            subtitle: 'Сповіщати про перенесення та скасування',
-            value: scheduleNotifications,
-            onChanged: (value) {
-              setState(() {
-                scheduleNotifications = value;
-              });
-            },
-          ),
+                    if (!mounted) return;
 
-          SettingsSwitchTile(
-            icon: Icons.assignment_outlined,
-            title: 'Домашні завдання',
-            subtitle: 'Нагадувати про домашні завдання',
-            value: homeworkNotifications,
-            onChanged: (value) {
-              setState(() {
-                homeworkNotifications = value;
-              });
-            },
-          ),
+                    setState(() {
+                      announcements = value;
+                    });
+                  },
+                ),
 
-          const SizedBox(height: 28),
+                // Розклад
+                SettingsSwitchTile(
+                  icon: Icons.calendar_month_outlined,
+                  title: 'Зміни розкладу',
+                  subtitle: 'Перенесення та скасування пар',
+                  value: schedule,
+                  onChanged: (value) async {
+                    await NotificationService.instance.setScheduleEnabled(
+                      value,
+                    );
 
-          const SettingsSectionTitle(title: 'РОЗКЛАД'),
+                    if (!mounted) return;
 
-          SettingsSwitchTile(
-            icon: Icons.history,
-            title: 'Минулі пари',
-            subtitle: 'Показувати завершені пари',
-            value: showPastLessons,
-            onChanged: (value) {
-              setState(() {
-                showPastLessons = value;
-              });
-            },
-          ),
+                    setState(() {
+                      schedule = value;
+                    });
+                  },
+                ),
 
-          const SizedBox(height: 28),
+                // Домашні завдання
+                SettingsSwitchTile(
+                  icon: Icons.assignment_outlined,
+                  title: 'Домашні завдання',
+                  subtitle: 'Нові домашні завдання',
+                  value: homework,
+                  onChanged: (value) async {
+                    await NotificationService.instance.setHomeworkEnabled(
+                      value,
+                    );
 
-          const SettingsSectionTitle(title: 'ПРО ЗАСТОСУНОК'),
+                    if (!mounted) return;
 
-          SettingsTile(
-            icon: Icons.info_outline,
-            title: 'Про Clamorix',
-            subtitle: 'Версія 0.1.0 Beta',
-            onTap: () {
-              showAboutDialog(
-                context: context,
-                applicationName: 'Clamorix',
-                applicationVersion: '0.1.0 Beta',
-                applicationLegalese: 'Навчальний застосунок групи',
-              );
-            },
-          ),
+                    setState(() {
+                      homework = value;
+                    });
+                  },
+                ),
 
-          SettingsTile(
-            icon: Icons.system_update_outlined,
-            title: 'Перевірити оновлення',
-            subtitle: 'Встановлено актуальну версію',
-            onTap: () {},
-          ),
-        ],
-      ),
+                const SizedBox(height: 28),
+
+                const SettingsSectionTitle(title: 'АКАУНТ'),
+
+                SettingsTile(
+                  icon: Icons.logout,
+                  title: 'Вийти з акаунту',
+                  subtitle: 'Повернутися на сторінку входу',
+
+                  onTap: () async {
+                    final shouldLogout = await showDialog<bool>(
+                      context: context,
+
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('Вийти з акаунту?'),
+
+                          content: const Text(
+                            'Для повторного входу потрібно буде '
+                            'ввести електронну пошту та пароль.',
+                          ),
+
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context, false);
+                              },
+                              child: const Text('Скасувати'),
+                            ),
+
+                            FilledButton(
+                              onPressed: () {
+                                Navigator.pop(context, true);
+                              },
+                              child: const Text('Вийти'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+
+                    if (shouldLogout != true) {
+                      return;
+                    }
+
+                    await AuthService.instance.signOut();
+
+                    if (!context.mounted) {
+                      return;
+                    }
+
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  },
+                ),
+
+                const SizedBox(height: 30),
+
+                const SettingsSectionTitle(title: 'ПРО ЗАСТОСУНОК'),
+
+                SettingsTile(
+                  icon: Icons.info_outline,
+                  title: 'Про Clamorix',
+                  subtitle: 'Версія 0.1.1 Beta',
+                  onTap: () {
+                    showAboutDialog(
+                      context: context,
+                      applicationName: 'Clamorix',
+                      applicationVersion: '0.1.1 Beta',
+                      applicationLegalese: 'Навчальний застосунок групи',
+                    );
+                  },
+                ),
+              ],
+            ),
     );
   }
 }
@@ -120,8 +217,10 @@ class SettingsSectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 4, bottom: 10),
+
       child: Text(
         title,
+
         style: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
