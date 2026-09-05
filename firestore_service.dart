@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/announcement.dart';
 import '../models/assignment.dart';
 import '../models/lesson.dart';
+import '../models/subject.dart';
 
 /// Централізований доступ до Firestore.
 ///
@@ -52,10 +53,26 @@ class FirestoreService {
         .collection('assignments')
         .where('subjectId', isEqualTo: subjectId)
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
+        .map((snapshot) {
+          final result = snapshot.docs
               .map((doc) => Assignment.fromFirestore(doc.id, doc.data()))
-              .toList(),
-        );
+              .toList();
+
+          result.sort((a, b) => a.deadline.compareTo(b.deadline));
+          return result;
+        });
+  }
+
+  // предмети
+  Stream<List<Subject>> subjects() {
+    return _db.collection('subjects').snapshots().map((snapshot) {
+      final result = snapshot.docs
+          .map((doc) => Subject.fromFirestore(doc.id, doc.data()))
+          .toList();
+
+      result.sort((a, b) => a.shortName.compareTo(b.shortName));
+
+      return result;
+    });
   }
 }
